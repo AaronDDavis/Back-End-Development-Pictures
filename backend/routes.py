@@ -35,7 +35,7 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    pass
+    return jsonify(data), 200
 
 ######################################################################
 # GET A PICTURE
@@ -44,7 +44,12 @@ def get_pictures():
 
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    pass
+    picture = [datum for datum in data if datum["id"] == id]
+    print(picture)
+    if len(picture) > 0:
+        return jsonify(picture[0]), 200
+    else:
+        return jsonify([]), 404
 
 
 ######################################################################
@@ -52,7 +57,12 @@ def get_picture_by_id(id):
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    pass
+    picture, status_code = get_picture_by_id(request.json["id"])
+    if status_code == 200:
+        return jsonify({"Message": f"picture with id {request.json['id']} already present"}), 302
+    else:
+        data.append(request.json)
+        return jsonify(data[-1]), 201
 
 ######################################################################
 # UPDATE A PICTURE
@@ -61,11 +71,24 @@ def create_picture():
 
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    pass
+    picture, status_code = get_picture_by_id(request.json["id"])
+    if status_code == 404:
+        return jsonify({"message": "picture not found"}), 404
+    else:
+        picture = [datum for datum in data if datum["id"] == request.json["id"]]
+        data.remove(picture[0])
+        data.append(request.json)
+        return jsonify(data[-1]), 200
 
 ######################################################################
 # DELETE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    pass
+    picture, status_code = get_picture_by_id(id)
+    if status_code == 404:
+        return jsonify({"message": "picture not found"}), 404
+    else:
+        picture = [datum for datum in data if datum["id"] == id]
+        data.remove(picture[0])
+        return jsonify(""), 204
